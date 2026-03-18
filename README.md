@@ -27,3 +27,5 @@ GIS Heatmap Visualization
 ## Goal
 
 To understand spatial patterns in rental prices across Bhubaneswar using machine learning and geospatial visualization.
+##LIVE DEMO
+https://armaanjain-byte.github.io/BBS_Rent_Prediction-ML/map.html
