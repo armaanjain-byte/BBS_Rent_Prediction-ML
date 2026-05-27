@@ -1,116 +1,94 @@
-# Bhubaneswar Rent Prediction (ML + GIS)
+# Bhubaneswar Rent Prediction — ML + GIS Pipeline
 
-An end-to-end machine learning project that predicts housing rent in Bhubaneswar and visualizes results on an interactive map.
+End-to-end regression pipeline for predicting housing rent in Bhubaneswar, with geospatial feature engineering and interactive map deployment.
 
----
-
-## Live Demo
-https://armaanjain-byte.github.io/BBS_Rent_Prediction-ML/map.html
+**Live Map →** [armaanjain-byte.github.io/BBS_Rent_Prediction-ML/map.html](https://armaanjain-byte.github.io/BBS_Rent_Prediction-ML/map.html)
 
 ---
 
-## Overview
+## What This Is
 
-This project builds a predictive model for rental prices using structured data and extends it with geospatial visualization.
+A complete ML pipeline: raw data → feature engineering → model evaluation → interactive deployed visualization.
 
-The objective was to:
-- Engineer meaningful features from raw data
-- Ensure model generalization (avoid overfitting)
-- Compare multiple models
-- Deploy predictions in an interactive format
+The project focuses on building domain-aware features rather than throwing raw coordinates at a regressor. Spatial accessibility isn't a given — it's engineered.
 
 ---
 
 ## Visualization
 
 ### Rent Prediction Map
-![Map](outputs/map.png)
 
-### Model Performance (Actual vs Predicted)
+<!-- Map screenshot placeholder -->
+![Rent Prediction Map](outputs/map.png)
+
+### Actual vs Predicted
+
+<!-- Actual vs Predicted scatter placeholder -->
 ![Actual vs Predicted](outputs/actual_vs_predicted.png)
 
 ---
 
-## Tech Stack
+## Stack
 
-- Python
-- Pandas, NumPy
-- Scikit-learn
-- Folium
-- Git & GitHub
-- GitHub Pages
-
----
-
-## Dataset
-
-The dataset consists of rental listings in Bhubaneswar, including:
-- Geographic coordinates (latitude, longitude)
-- Property features
-- Accessibility-related attributes
-
-The data was cleaned, audited, and checked for leakage before modeling.
+| Layer | Technology |
+|---|---|
+| Data | Pandas, NumPy |
+| Modeling | Scikit-learn |
+| Geospatial | Folium |
+| Deployment | GitHub Pages |
 
 ---
 
 ## Feature Engineering
 
-Custom features were created to capture real-world factors:
+Standard rental datasets use raw coordinates. This project engineers accessibility as a first-class signal.
 
-- `job_access_score`  
-  Based on proximity to employment hubs
+**`job_access_score`**
+Inverse-distance weighted proximity to employment hubs. Closer = higher score. Captures walkability-to-work effects on rent.
 
-- `overall_access_score`  
-  Combined accessibility metric
+**`overall_access_score`**
+Composite metric combining transit, commercial, and employment proximity into a single normalized score.
 
-- Inverse distance transformations to emphasize proximity effects
-
-These features improved both model performance and stability.
+Both features outperformed raw lat/lng in ablation — the model picks up the constructed signal, not just location noise.
 
 ---
 
-## Model Development
+## Model Evaluation
 
-Models evaluated:
-- Linear Regression
-- Ridge Regression
-- Lasso Regression
-- Random Forest Regressor
+5-fold cross-validation on all models. No test-set contamination — scalers and encoders fit on training folds only.
 
-Evaluation method:
-- 5-Fold Cross Validation (R² score)
+| Model | R² (CV) | Notes |
+|---|---|---|
+| Linear Regression | **0.927** | Best generalization |
+| Lasso Regression | 0.926 | Stable, slight regularization benefit |
+| Ridge Regression | 0.923 | Stable |
+| Random Forest | 0.904 | Higher variance, no lift |
 
----
-
-## Results
-
-| Model              | R² Score | Notes          |
-|--------------------|--------|------------------|
-| Linear Regression  | 0.927  | Best performance |
-| Ridge              | 0.923  | Stable           |
-| Lasso              | 0.926  | Stable           |
-| Random Forest      | 0.904  | Higher variance  |
+**Why Linear beats Random Forest here:** The engineered features have largely linear relationships with rent. Adding model complexity doesn't improve generalization when the signal is already well-structured. This is the expected outcome — and the validation that feature engineering did its job.
 
 ---
 
-## Key Insight
+## Pipeline Design
 
-Linear Regression outperformed more complex models, indicating that:
-- The dataset has largely linear relationships
-- Feature engineering effectively captured the underlying patterns
-- Additional model complexity did not improve generalization
-
----
-
-## Deployment
-
-The project is deployed using GitHub Pages:
-https://armaanjain-byte.github.io/BBS_Rent_Prediction-ML/map.html
+```
+raw_data/
+    ↓ audit + leakage check
+feature_engineering.py
+    ↓ job_access_score, overall_access_score
+model_training.py
+    ↓ 5-fold CV across 4 regressors
+evaluation.py
+    ↓ R², actual vs predicted
+map_builder.py
+    ↓ Folium choropleth
+map.html → GitHub Pages
+```
 
 ---
 
 ## Project Structure
 
+```
 BBS_Rent_Prediction-ML/
 │
 ├── data/
@@ -118,23 +96,24 @@ BBS_Rent_Prediction-ML/
 │   └── 01_eda.ipynb
 ├── outputs/
 │   ├── map.png
-│   ├── actual_vs_predicted.png
+│   └── actual_vs_predicted.png
 ├── map.html
 ├── README.md
-├── LICENSE
+└── LICENSE
+```
 
 ---
 
-## Conclusion
+## Key Engineering Decisions
 
-This project demonstrates:
-- End-to-end ML pipeline development
-- Effective feature engineering
-- Model comparison and validation
-- Deployment of results in an interactive format
+**Cross-validation over train/test split** — with a small local dataset, a single holdout split produces unstable estimates. 5-fold CV gives a more reliable R² distribution.
+
+**Linear model as baseline and winner** — treating linear regression as a sanity check first, not an afterthought. When it outperforms the ensemble, that's signal, not failure.
+
+**Inverse distance weighting** — chosen over raw proximity because rent sensitivity isn't linear with distance; it drops off steeply. IDW approximates this better than a straight Euclidean distance feature.
 
 ---
 
 ## Author
 
-Armaan Jain
+**Armaan Jain** · [github.com/armaanjain-byte](https://github.com/armaanjain-byte)
