@@ -52,7 +52,7 @@ Composite metric combining transit, commercial, and employment proximity into a 
 Both features outperformed raw lat/lng in ablation — the model picks up the constructed signal, not just location noise.
 
 ---
-
+## Core engine
 ## Model Evaluation
 
 5-fold cross-validation on all models. No test-set contamination — scalers and encoders fit on training folds only.
